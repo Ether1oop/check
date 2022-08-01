@@ -1,14 +1,19 @@
 import solidity_parser
+import handleFunctionDefinition
+import rules
+import solidityUnit
 
 
 def solidity_parse(path):
     try:
         source_unit = solidity_parser.parse_file(path)
-        # source_unit
-        children_list = source_unit['children']
-        print("S")
+        return source_unit
     except:
         print("parse error!")
 
 
-solidity_parse("test/EmitAdd/2.sol")
+source_unit = solidity_parse("test/EmitAdd/1.sol")
+
+functionList = handleFunctionDefinition.retrieveAllFunctionNameFromContract(solidityUnit.getContractDefinition(source_unit))
+
+print("S")
