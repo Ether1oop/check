@@ -22,3 +22,7 @@ def getContractDefinition(source_unit):
         if child['type'] == 'ContractDefinition':
             contract_list.append(child)
     return contract_list
+
+
+
+

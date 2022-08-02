@@ -1,7 +1,7 @@
 import solidity_parser
-import handleFunctionDefinition
-import rules
-import solidityUnit
+import FunctionDefinition
+import Rules
+import SolidityUnit
 
 
 def solidity_parse(path):
@@ -12,8 +12,9 @@ def solidity_parse(path):
         print("parse error!")
 
 
-source_unit = solidity_parse("test/EmitAdd/1.sol")
+source_unit = solidity_parse("test/EmitMove/1.sol")
 
-functionList = handleFunctionDefinition.retrieveAllFunctionNameFromContract(solidityUnit.getContractDefinition(source_unit))
+# functionList = handleFunctionDefinition.retrieveTransferFromContract(solidityUnit.getContractDefinition(source_unit))
+FunctionDefinition.getAllEmitStatementFromBlock(source_unit['children'][5]['subNodes'][21]['body'])
 
 print("S")
