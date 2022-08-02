@@ -64,8 +64,8 @@ def getAllNameTypeFromStateVariableDeclaration(state_list):
     return nameType
 
 
-def getAllEmitStatementFromBlock(block):
-    nodes = block['statements']
+def getAllEmitStatementFromFunctionDefinition(function_node):
+    nodes = function_node['body']['statements']
     emit_statements = []
     for item in nodes:
         if item['type'] == 'EmitStatement':
@@ -76,14 +76,5 @@ def getAllEmitStatementFromBlock(block):
             elif item['FalseBody'] is not None:
                 nodes.extend(item['FalseBody']['statements'])
     return emit_statements
-
-# def getAllEmitStatementFromIfStatement(if_statement):
-
-
-
-
-def getAllEmitStatementFromFunctionDefinition(function_node):
-    statements = function_node['body']['statements']
-
 
 
