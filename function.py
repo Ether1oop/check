@@ -15,6 +15,6 @@ def solidity_parse(path):
 source_unit = solidity_parse("test/EmitMove/1.sol")
 
 # functionList = handleFunctionDefinition.retrieveTransferFromContract(solidityUnit.getContractDefinition(source_unit))
-FunctionDefinition.getAllEmitStatementFromBlock(source_unit['children'][5]['subNodes'][21]['body'])
+FunctionDefinition.getAllEmitStatementFromFunctionDefinition(source_unit['children'][5]['subNodes'][21])
 
 print("S")

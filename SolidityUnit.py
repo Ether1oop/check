@@ -24,5 +24,18 @@ def getContractDefinition(source_unit):
     return contract_list
 
 
+def getFunctionDefinitionFromContractDefinition(contract_node):
+    function_list = []
+    for item in contract_node['subNodes']:
+        if item['type'] == 'FunctionDefinition':
+            function_list.append(item)
+    return function_list
 
+
+def getStateVariableDeclarationFromContractDefinition(contract_node):
+    state_list = []
+    for item in contract_node['subNodes']:
+        if item['type'] == 'StateVariableDeclaration':
+            state_list.append(item)
+    return state_list
 

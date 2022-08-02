@@ -1,3 +1,6 @@
+import SolidityUnit
+
+
 def retrieveTransferFromContract(contract_list):
     function_list = []
     for contract_node in contract_list:
@@ -36,18 +39,10 @@ def retrieveConstructorFromContract(contract_list):
     return function_list
 
 
-def getStateVariableDeclarationFromContractDefinition(contract_node):
-    state_list = []
-    for item in contract_node['subNodes']:
-        if item['type'] == 'StateVariableDeclaration':
-            state_list.append(item)
-    return state_list
-
-
 def getAllStateVariableDeclarationFromContractDefinition(contract_list):
     state_list = []
     for contract_node in contract_list:
-        state_list.append(getStateVariableDeclarationFromContractDefinition(contract_node))
+        state_list.append(SolidityUnit.getStateVariableDeclarationFromContractDefinition(contract_node))
     return state_list
 
 
@@ -76,5 +71,14 @@ def getAllEmitStatementFromFunctionDefinition(function_node):
             elif item['FalseBody'] is not None:
                 nodes.extend(item['FalseBody']['statements'])
     return emit_statements
+
+
+def getVariablesFromEmitStatement(emit_statement):
+    variable_list = emit_statement['eventCall']['arguments']
+    result = []
+    for item in variable_list:
+        result.append(item['name'])
+    return result
+
 
 
