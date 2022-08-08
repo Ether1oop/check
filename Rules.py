@@ -53,6 +53,8 @@ def emitChangeParameter_Gas(contract_node):
                     print("\tLocation:  function " + function_name)
 
 
+# def emitChangeParameter_MetaTransaction(contract_node):
+# def emitChangeParameter_Version(program_node):
 
 
 

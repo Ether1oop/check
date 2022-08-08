@@ -64,9 +64,9 @@ def getEmitStatementFromFunctionDefinition(function_node):
         if item['type'] == 'EmitStatement':
             emit_statements.append(item)
         elif item['type'] == 'IfStatement':
-            if item['TrueBody'] is not None:
+            if item['TrueBody'] is not None and item['TrueBody']['type'] == 'Block':
                 nodes.extend(item['TrueBody']['statements'])
-            elif item['FalseBody'] is not None:
+            elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
                 nodes.extend(item['FalseBody']['statements'])
     return emit_statements
 
