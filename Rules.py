@@ -1,5 +1,6 @@
 import FunctionDefinition
 import SolidityUnit
+import dictdiffer
 
 
 def emitAdd_AfterTransfer(contract_node):
@@ -18,14 +19,12 @@ def emitAdd_AfterApprove(contract_node):
             print("\tLocation: function " + function_node['name'])
 
 
-
 def emitAdd_AfterConstruct(contract_node):
     function_list = FunctionDefinition.retrieveConstructorFromContract(contract_node)
     for function_node in function_list:
         if not FunctionDefinition.IsContainedEmitStatement(function_node):
             print("Advice: Please insert event in constructor to record the owner")
             print("\tLocation: function " + function_node['name'])
-
 
 
 def emitChangeParameter_Gas(contract_node):
@@ -35,7 +34,8 @@ def emitChangeParameter_Gas(contract_node):
 
     function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
     for function_node in function_list:
-        if not FunctionDefinition.IsContainedEmitStatement(function_node):
+        emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+        if len(emit_statement_list) == 0:
             continue
         function_name = function_node['name']
         # Get all temp variable
@@ -43,7 +43,6 @@ def emitChangeParameter_Gas(contract_node):
         temp_typename_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(temp_variable_list)
         temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
         # Get all variable in emit
-        emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
         emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
         # 对于每一个在emit中的变量，如果他不在临时变量中，但是在全局变量中，就表示需要进行修改
         for emit_node in emit_variableName_list:
@@ -72,7 +71,6 @@ def emitChangeParameter_MetaTransaction(absolute_path, source_unit):
                             print("\tLocation: function " + function_node['name'])
 
 
-
 def emitChangeParameter_Version(contract_node):
     function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
     for function_node in function_list:
@@ -85,6 +83,26 @@ def emitChangeParameter_Version(contract_node):
                     print("\tLocation: function " + function_node['name'])
 
 
-# def emitSwapOrder(contract_node):
+def emitSwapOrder(contract_node):
+    event_list = SolidityUnit.getEventDefinitionFromContractDefinition(contract_node)
+    event_content_list = SolidityUnit.getAllVariableFromEventDefinition(event_list)
+    if len(event_content_list) == 0:
+        return 0
+    function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
+    for function_node in function_list:
+        emit_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+        if len(emit_list) == 0:
+            continue
+
+        for emit_node in emit_list:
+            emit_name = emit_node['eventCall']['expression']['name']
+            parameter = []
+            for item in emit_node['eventCall']['arguments']:
+                if item['type'] == 'Identifier':
+                    parameter.append(item['name'])
+            event = SolidityUnit.getEventDefinitionFromList(emit_name, event_content_list)
+            if SolidityUnit.IsOrderError(parameter, event):
+                print("Advice: The order of variables recorded in emit should be consistent with the event definition")
+                print("\tLocation: function " + function_node['name'])
 
 

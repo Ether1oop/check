@@ -1,5 +1,5 @@
 import os
-
+import difflib
 import solidity_parser
 import queue
 
@@ -32,7 +32,8 @@ def getContractDefinition(source_unit):
     contract_list = []
     for child in source_unit['children']:
         if child['type'] == 'ContractDefinition':
-            contract_list.append(child)
+            if child['kind'] == 'contract':
+                contract_list.append(child)
     return contract_list
 
 
@@ -99,3 +100,70 @@ def IsContainedERC20OrERC2771Context(path_list):
                 return True
 
     return False
+
+
+def getEventDefinitionFromContractDefinition(contract_node):
+    event_list = []
+    for item in contract_node['subNodes']:
+        if item['type'] == 'EventDefinition':
+            event_list.append(item)
+    return event_list
+
+
+def getVariableFromEventDefinition(event_node):
+    name = event_node['name']
+    parameter = []
+    for item in event_node['parameters']['parameters']:
+        parameter.append(item['name'])
+    return [name, parameter]
+
+
+def getAllVariableFromEventDefinition(event_list):
+    result = []
+    for event_node in event_list:
+        result.append(getVariableFromEventDefinition(event_node))
+    return result
+
+
+def getEventDefinitionFromList(event_name, event_list):
+    for event in event_list:
+        if event_name == event[0]:
+            return event[1]
+
+
+def calculateSimilarity(src_list, target_list):
+    result = []
+    for src_node in src_list:
+        similarity = 0
+        for target_node in target_list:
+            temp = difflib.SequenceMatcher(None, src_node, target_node).quick_ratio()
+            if temp > similarity:
+                similarity = temp
+        result.append(similarity)
+
+    for item in result:
+        if item < 0.9:
+            return False
+
+    return True
+
+
+def IsOrderError(src_list, target_list):
+    if len(src_list) != len(target_list):
+        return False
+
+    for src_node in src_list:
+        if src_node not in target_list:
+            return False
+
+    for i in range(0,len(src_list)):
+        if src_list[i] != target_list[i]:
+            return True
+
+    return False
+
+
+
+
+
+
