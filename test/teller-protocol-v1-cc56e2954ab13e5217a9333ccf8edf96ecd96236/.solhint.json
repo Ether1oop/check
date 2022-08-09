@@ -1,0 +1,16 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "check-send-result": "warn",
+    "reentrancy": "warn",
+    "quotes": "error",
+    "compiler-version": "off",
+    "contract-name-camelcase": "off",
+    "no-empty-blocks": "off",
+    "func-name-mixedcase": "off",
+    "no-inline-assembly": "off",
+    "var-name-mixedcase": "off"
+  },
+  "plugins": ["prettier"]
+}

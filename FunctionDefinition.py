@@ -68,6 +68,8 @@ def getEmitStatementFromFunctionDefinition(function_node):
                 nodes.extend(item['TrueBody']['statements'])
             elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
                 nodes.extend(item['FalseBody']['statements'])
+        elif item['type'] == 'ForStatement':
+            nodes.extend(item['body']['statements'])
     return emit_statements
 
 

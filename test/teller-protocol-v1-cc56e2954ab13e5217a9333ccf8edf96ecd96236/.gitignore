@@ -1,0 +1,33 @@
+# Packages
+node_modules
+yarn-error.log
+
+# ENV
+.env
+
+# Coverage
+coverage.json
+coverage
+.coverage_artifacts
+.coverage_contracts
+
+# Mac
+.DS_Store
+
+# IDE
+.idea
+.vscode
+.vs
+
+# Build
+build
+cache
+artifacts
+typechain
+
+# Deployment folders
+deployments/hardhat
+deployments/localhost
+
+# other
+ignored

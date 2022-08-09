@@ -53,8 +53,38 @@ def emitChangeParameter_Gas(contract_node):
                     print("\tLocation:  function " + function_name)
 
 
-# def emitChangeParameter_MetaTransaction(contract_node):
-# def emitChangeParameter_Version(program_node):
+def emitChangeParameter_MetaTransaction(absolute_path, source_unit):
+    import_list = SolidityUnit.getImportDirective(source_unit)
+    path_list = SolidityUnit.getAllPathFromImportDirective(absolute_path, import_list)
+    if SolidityUnit.IsContainedERC20OrERC2771Context(path_list):
+        contract_list = SolidityUnit.getContractDefinition(source_unit)
+        for contract_node in contract_list:
+            function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
+            for function_node in function_list:
+                emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+                if len(emit_statement_list) == 0:
+                    continue
+                for item in emit_statement_list:
+                    arguments = item['eventCall']['arguments']
+                    for node in arguments:
+                        if node['type'] == 'MemberAccess' and node['expression']['name'] == 'msg' and node['memberName'] == 'sender':
+                            print("Advice: you should use _msgSender() to replace msg.sender ")
+                            print("\tLocation: function " + function_node['name'])
 
+
+
+def emitChangeParameter_Version(contract_node):
+    function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
+    for function_node in function_list:
+        emit_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+        for item in emit_list:
+            arguments = item['eventCall']['arguments']
+            for node in arguments:
+                if node['type'] == 'MemberAccess' and node['expression']['name'] == 'this':
+                    print("Advice: you should use address(this) instead of this.")
+                    print("\tLocation: function " + function_node['name'])
+
+
+# def emitSwapOrder(contract_node):
 
 
