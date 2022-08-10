@@ -22,13 +22,13 @@ contract TWRegistry is Multicall, ERC2771Context, AccessControlEnumerable {
         _setupRole(OPERATOR_ROLE, _msgSender());
     }
 
-    function add(address deployer, address deployment) external {
+    function add(address _deployer, address _deployment) external {
         require(hasRole(OPERATOR_ROLE, _msgSender()) || _deployer == _msgSender(), "not operator.");
 
-        bool added = deployments[deployer].add(deployment);
+        bool added = deployments[_deployer].add(_deployment);
         require(added, "failed to add");
 
-        emit Added(deployment, deployer);
+        emit Added(_deployment, _deployer);
     }
 
     function remove(address _deployer, address _deployment) external {
