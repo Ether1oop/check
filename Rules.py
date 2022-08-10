@@ -44,7 +44,7 @@ def emitChangeParameter_Gas(contract_node):
         temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
         # Get all variable in emit
         emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
-        # ¶ÔÓÚÃ¿Ò»¸öÔÚemitÖÐµÄ±äÁ¿£¬Èç¹ûËû²»ÔÚÁÙÊ±±äÁ¿ÖÐ£¬µ«ÊÇÔÚÈ«¾Ö±äÁ¿ÖÐ£¬¾Í±íÊ¾ÐèÒª½øÐÐÐÞ¸Ä
+        # ï¿½ï¿½ï¿½ï¿½Ã¿Ò»ï¿½ï¿½ï¿½ï¿½emitï¿½ÐµÄ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½Í±ï¿½Ê¾ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Þ¸ï¿½
         for emit_node in emit_variableName_list:
             for variable in emit_node:
                 if variable not in temp_typename_list and variable in state_typeName_list:
@@ -101,7 +101,7 @@ def emitSwapOrder(contract_node):
                 if item['type'] == 'Identifier':
                     parameter.append(item['name'])
             event = SolidityUnit.getEventDefinitionFromList(emit_name, event_content_list)
-            if SolidityUnit.IsOrderError(parameter, event):
+            if SolidityUnit.calculateSimilarity(parameter, event):
                 print("Advice: The order of variables recorded in emit should be consistent with the event definition")
                 print("\tLocation: function " + function_node['name'])
 

@@ -145,7 +145,12 @@ def calculateSimilarity(src_list, target_list):
         if item < 0.9:
             return False
 
-    return True
+    for i in range(0,len(src_list)):
+        similarity = difflib.SequenceMatcher(None,src_list[i], target_list[i]).quick_ratio()
+        if similarity < 0.9:
+            return True
+
+    return False
 
 
 def IsOrderError(src_list, target_list):
