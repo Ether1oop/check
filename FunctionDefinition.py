@@ -58,6 +58,8 @@ def getAllNameTypeFromStateVariableDeclaration(state_list):
 
 
 def getEmitStatementFromFunctionDefinition(function_node):
+    if len(function_node['body']) == 0:
+        return []
     nodes = function_node['body']['statements']
     emit_statements = []
     for item in nodes:
@@ -68,7 +70,7 @@ def getEmitStatementFromFunctionDefinition(function_node):
                 nodes.extend(item['TrueBody']['statements'])
             elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
                 nodes.extend(item['FalseBody']['statements'])
-        elif item['type'] == 'ForStatement':
+        elif item['type'] == 'ForStatement' and item['body']['type'] == 'Block':
             nodes.extend(item['body']['statements'])
     return emit_statements
 

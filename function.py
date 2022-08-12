@@ -62,15 +62,22 @@ def test_getAllEventDefinitionFromImportDirective(absolute_path, import_list):
         contract_list = SolidityUnit.getContractDefinition(source_unit)
         for contract_node in contract_list:
             event_list.extend(SolidityUnit.getEventDefinitionFromContractDefinition(contract_node))
+
+
+
+
         import_list = SolidityUnit.getImportDirective(source_unit)
         for import_node in import_list:
             relative_path_list.put(import_node['path'])
+
 
     return event_list
 
 def test_emitSwapOrder(absolute_path_node):
     num = 0
     source_unit = SolidityUnit.solidity_parse(absolute_path_node)
+    if source_unit is None:
+        return 0
     #取得其import信息，并编译，取得所有event定义
     event_list = test_getAllEventDefinitionFromImportDirective(absolute_path_node,SolidityUnit.getImportDirective(source_unit))
     contract_list = SolidityUnit.getContractDefinition(source_unit)
@@ -96,12 +103,17 @@ def test_emitSwapOrder(absolute_path_node):
                 for item in emit_node['eventCall']['arguments']:
                     if item['type'] == 'Identifier':
                         parameter.append(item['name'])
+                    elif item['type'] == 'MemberAccess':
+                        parameter.append(item['memberName'])
                 event = SolidityUnit.getEventDefinitionFromList(emit_name, event_content_list)
+                if event is None:
+                    continue
                 if SolidityUnit.calculateSimilarity(parameter, event):
-                    # print("Advice: The order of variables recorded in emit should be consistent with the event definition")
-                    # print("\tLocation: function " + function_node['name'])
+                    print("Advice: The order of variables recorded in emit should be consistent with the event definition")
+                    print("\tLocation: function " + function_node['name'])
                     num += 1
     return num
+
 
 
 if __name__ == '__main__':
@@ -109,13 +121,17 @@ if __name__ == '__main__':
 
     # test_emitSwapOrder("/home/yantong/Code/check/test/EmitSwapOrder/1.sol")
 
-    for repository_name in repositories_list:
+    for i in range(0,len(repositories_list)):
+        repository_name = repositories_list[i]
         repo_path = "/home/yantong/Code/CodeLine/repos/" + repository_name
         if os.path.isdir(repo_path):
             absolute_path_list = getAllAbsolutePathOfSolidityFiles(repo_path)
-            for absolute_path_node in absolute_path_list:
+            for j in range(0,len(absolute_path_list)):
+                absolute_path_node = absolute_path_list[j]
                 result = test_emitSwapOrder(absolute_path_node)
+                print(str(i) + "\t" + str(j) + "\t" + absolute_path_node)
+                if result > 0:
+                    with open("result.txt","a") as file:
+                        file.write(repository_name + "," + absolute_path_node)
 
 
-
-            print("s")

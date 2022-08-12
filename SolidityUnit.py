@@ -7,9 +7,10 @@ import queue
 def solidity_parse(path):
     try:
         source_unit = solidity_parser.parse_file(path)
-        return source_unit
     except:
+        source_unit = None
         print("parse error!\t" + path)
+    return source_unit
 
 
 def getPragmaDirective(source_unit):
@@ -132,6 +133,8 @@ def getEventDefinitionFromList(event_name, event_list):
 
 
 def calculateSimilarity(src_list, target_list):
+    if len(src_list) != len(target_list):
+        return False
     result = []
     for src_node in src_list:
         similarity = 0
