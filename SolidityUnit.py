@@ -6,6 +6,7 @@ import queue
 
 def solidity_parse(path):
     try:
+        print("\t\t compiling " + path)
         source_unit = solidity_parser.parse_file(path)
     except:
         source_unit = None
@@ -52,6 +53,13 @@ def getStateVariableDeclarationFromContractDefinition(contract_node):
         if item['type'] == 'StateVariableDeclaration':
             state_list.append(item)
     return state_list
+
+
+def getBaseContractsFromContractDefinition(contract_node):
+    result = []
+    for base_item in contract_node['baseContracts']:
+        result.append(base_item['baseName']['namePath'])
+    return result
 
 
 def repairNewPath(absolute_path, path):
