@@ -44,10 +44,11 @@ def getAllStateVariableDeclarationFromContractDefinition(contract_list):
 
 
 def getNameTypeFromStateVariableDeclaration(state_node):
-    name = state_node['variables'][0]['name']
+    if state_node['variables'] is not None:
+        name = state_node['variables'][0]['name']
     # typeName = state_node['variables'][0]['typeName']['name']
     # return [name,typeName]
-    return name
+        return name
 
 
 def getAllNameTypeFromStateVariableDeclaration(state_list):
@@ -63,6 +64,10 @@ def getEmitStatementFromFunctionDefinition(function_node):
     nodes = function_node['body']['statements']
     emit_statements = []
     for item in nodes:
+        if item is None:
+            continue
+        if 'type' not in item:
+            continue
         if item['type'] == 'EmitStatement':
             emit_statements.append(item)
         elif item['type'] == 'IfStatement':
@@ -97,13 +102,19 @@ def getVariableDeclarationStatementFromFunctionDefinition(function_node):
     nodes = function_node['body']['statements']
     variable_statements = []
     for item in nodes:
+        if item is None:
+            continue
+        if 'type' not in item:
+            continue
         if item['type'] == 'VariableDeclarationStatement':
             variable_statements.append(item)
         elif item['type'] == 'IfStatement':
-            if item['TrueBody'] is not None:
+            if item['TrueBody'] is not None and item['TrueBody']['type'] == 'Block':
                 nodes.extend(item['TrueBody']['statements'])
-            elif item['FalseBody'] is not None:
+            elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
                 nodes.extend(item['FalseBody']['statements'])
+        elif item['type'] == 'ForStatement' and item['body']['type'] == 'Block':
+            nodes.extend(item['body']['statements'])
     return variable_statements
 
 

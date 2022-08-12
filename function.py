@@ -47,13 +47,14 @@ def getAllAbsolutePathOfSolidityFiles(repository_path):
 
 
 def test_getAllEventDefinitionFromImportDirective(absolute_path, import_list):
-    relative_path_list = queue.Queue()
+    relative_path_list = []
     event_list = []
     for import_node in import_list:
-        relative_path_list.put(import_node['path'])
+        relative_path_list.append(import_node['path'])
 
-    while relative_path_list.qsize() > 0:
-        path_item = SolidityUnit.repairNewPath(absolute_path, relative_path_list.get())
+    for i in range(0,len(relative_path_list)):
+
+        path_item = SolidityUnit.repairNewPath(absolute_path, relative_path_list[i])
         if not os.path.exists(path_item):
             continue
         source_unit = SolidityUnit.solidity_parse(path_item)
@@ -65,8 +66,8 @@ def test_getAllEventDefinitionFromImportDirective(absolute_path, import_list):
 
         import_list = SolidityUnit.getImportDirective(source_unit)
         for import_node in import_list:
-
-            relative_path_list.put(import_node['path'])
+            if import_node not in relative_path_list:
+                relative_path_list.append(import_node['path'])
 
     return event_list
 
@@ -129,22 +130,63 @@ def test_emitSwapOrder(absolute_path_node):
     return num
 
 
+def test_emitChangeParameter_Gas(absolute_path_node):
+    num = 0
+    source_unit = SolidityUnit.solidity_parse(absolute_path_node)
+
+    if source_unit is None:
+        return 0
+
+    contract_list = SolidityUnit.getContractDefinition(source_unit)
+
+    if not IsContainedEmitStatement(contract_list):
+        return 0
+
+    for contract_node in contract_list:
+        # Get all global variables
+        state_variable_list = SolidityUnit.getStateVariableDeclarationFromContractDefinition(contract_node)
+        state_typeName_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(state_variable_list)
+        function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
+        for function_node in function_list:
+            emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+            if len(emit_statement_list) == 0:
+                continue
+            function_name = function_node['name']
+            # Get all temp variable
+            temp_variable_list = FunctionDefinition.getVariableDeclarationStatementFromFunctionDefinition(function_node)
+            temp_typename_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(temp_variable_list)
+            temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
+            # Get all variable in emit
+            emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
+            for emit_node in emit_variableName_list:
+                for variable in emit_node:
+                    if variable not in temp_typename_list and variable in state_typeName_list:
+                        # print(
+                        #     "Advice: you can use temporary variables instead of global variables to reduce about 800 gas when emit something")
+                        # print("\tLocation:  function " + function_name)\
+                        num += 1
+    return num
+
+
 if __name__ == '__main__':
     repositories_list = getRepositoriesNameList()
 
     # test_emitSwapOrder("/home/yantong/Code/check/test/EmitSwapOrder/1.sol")
 
-    for i in range(1,len(repositories_list)):
+    for i in range(0,len(repositories_list)):
         repository_name = repositories_list[i]
         repo_path = "/home/yantong/Code/CodeLine/repos/" + repository_name
         if os.path.isdir(repo_path):
             absolute_path_list = getAllAbsolutePathOfSolidityFiles(repo_path)
-            for j in range(1,len(absolute_path_list)):
+            for j in range(0,len(absolute_path_list)):
                 absolute_path_node = absolute_path_list[j]
                 print(str(i) + "\t" + str(j) + "\t" + absolute_path_node)
                 result = test_emitSwapOrder(absolute_path_node)
+                result += test_emitChangeParameter_Gas(absolute_path_node)
                 if result > 0:
                     with open("result.txt","a") as file:
-                        file.write(repository_name + "," + absolute_path_node)
+                        file.write(repository_name + "," + absolute_path_node + "\n")
+
+
 
 
