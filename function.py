@@ -27,7 +27,7 @@ def getRepositoriesNameList():
     file_list = os.listdir(repositories_path)
     file_list.sort(key=lambda x:int(x[:-4]))
 
-    for i in range(0,200):
+    for i in range(0,50):
         file_node = file_list[i]
         with open(repositories_path + "/" + file_node,"r") as file:
             jsonStr = json.loads(file.read())
@@ -123,11 +123,57 @@ def test_emitSwapOrder(absolute_path_node):
                 event = SolidityUnit.getEventDefinitionFromList(emit_name, event_content_list)
                 if event is None:
                     continue
-                if SolidityUnit.calculateSimilarity(parameter, event):
-                    print("Advice: The order of variables recorded in emit should be consistent with the event definition")
-                    print("\tLocation: function " + function_node['name'])
+                if SolidityUnit.IsOrderError(parameter, event):
+                    # print("Advice: The order of variables recorded in emit should be consistent with the event definition")
+                    # print("\tLocation: function " + function_node['name'])
                     num += 1
     return num
+
+
+def _test_emitSwapOrder(absolute_path_node):
+    result = set()
+    source_unit = SolidityUnit.solidity_parse(absolute_path_node)
+
+    if source_unit is None:
+        return 0
+
+    contract_list = SolidityUnit.getContractDefinition(source_unit)
+
+    if not IsContainedEmitStatement(contract_list):
+        return 0
+
+    #取得其import信息，并编译，取得所有event定义
+    event_list = test_getAllEventDefinitionFromImportDirective(absolute_path_node,SolidityUnit.getImportDirective(source_unit))
+
+    for contract_node in contract_list:
+        event_list.extend(SolidityUnit.getEventDefinitionFromContractDefinition(contract_node))
+
+    event_content_list = SolidityUnit.getAllVariableFromEventDefinition(event_list)
+
+    if len(event_content_list) == 0:
+        return 0
+
+    for contract_node in contract_list:
+        function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
+        for function_node in function_list:
+            emit_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+            if len(emit_list) == 0:
+                continue
+
+            for emit_node in emit_list:
+                emit_name = emit_node['eventCall']['expression']['name']
+                parameter = []
+                for item in emit_node['eventCall']['arguments']:
+                    if item['type'] == 'Identifier':
+                        parameter.append(item['name'])
+                    elif item['type'] == 'MemberAccess':
+                        parameter.append(item['memberName'])
+                event = SolidityUnit.getEventDefinitionFromList(emit_name, event_content_list)
+                if event is None:
+                    continue
+                if SolidityUnit.IsOrderError(parameter, event):
+                    result.add(function_node['name'])
+    return list(result)
 
 
 def test_emitChangeParameter_Gas(absolute_path_node):
@@ -168,7 +214,42 @@ def test_emitChangeParameter_Gas(absolute_path_node):
     return num
 
 
-if __name__ == '__main__':
+def _test_emitChangeParameter_Gas(absolute_path_node):
+    result = set()
+    source_unit = SolidityUnit.solidity_parse(absolute_path_node)
+
+    if source_unit is None:
+        return 0
+
+    contract_list = SolidityUnit.getContractDefinition(source_unit)
+
+    if not IsContainedEmitStatement(contract_list):
+        return 0
+
+    for contract_node in contract_list:
+        # Get all global variables
+        state_variable_list = SolidityUnit.getStateVariableDeclarationFromContractDefinition(contract_node)
+        state_typeName_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(state_variable_list)
+        function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
+        for function_node in function_list:
+            emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+            if len(emit_statement_list) == 0:
+                continue
+            function_name = function_node['name']
+            # Get all temp variable
+            temp_variable_list = FunctionDefinition.getVariableDeclarationStatementFromFunctionDefinition(function_node)
+            temp_typename_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(temp_variable_list)
+            temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
+            # Get all variable in emit
+            emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
+            for emit_node in emit_variableName_list:
+                for variable in emit_node:
+                    if variable not in temp_typename_list and variable in state_typeName_list:
+                        result.add(function_name)
+    return list(result)
+
+
+def operator_1():
     repositories_list = getRepositoriesNameList()
 
     # test_emitSwapOrder("/home/yantong/Code/check/test/EmitSwapOrder/1.sol")
@@ -182,11 +263,47 @@ if __name__ == '__main__':
                 absolute_path_node = absolute_path_list[j]
                 print(str(i) + "\t" + str(j) + "\t" + absolute_path_node)
                 result = test_emitSwapOrder(absolute_path_node)
-                result += test_emitChangeParameter_Gas(absolute_path_node)
                 if result > 0:
-                    with open("result.txt","a") as file:
+                    with open("result_emitSwapOrder.txt","a") as file:
                         file.write(repository_name + "," + absolute_path_node + "\n")
+                # result = test_emitChangeParameter_Gas(absolute_path_node)
+                # if result > 0:
+                #     with open("result_emitChangeParameter_Gas.txt","a") as file:
+                #         file.write(repository_name + "," + absolute_path_node + "\n")
 
+
+def dealwithAbsolutePath(repoName , absolutePath):
+    pathList = absolutePath.split("/")
+    path = "https://github.com/" + repoName.replace(" ","/") + "/blob/master/" + "/".join(pathList[7:])
+
+    return path
+
+
+def operator_2():
+    emitSwapOrder_list = []
+    emitChangeParameter_Gas = []
+    with open("result_emitSwapOrder.txt","r") as file:
+        emitSwapOrder_list = file.read().split("\n")[:-1]
+    with open("result_emitChangeParameter_Gas.txt","r") as file:
+        emitChangeParameter_Gas = file.read().split("\n")[:-1]
+
+    for item in emitSwapOrder_list:
+        absolutePath = item.split(",")[1]
+        result = _test_emitSwapOrder(absolutePath)
+        for node in result:
+            with open("location_emitSwapOrder.txt","a") as file:
+                file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
+
+    # for item in emitChangeParameter_Gas:
+    #     absolutePath = item.split(",")[1]
+    #     result = _test_emitChangeParameter_Gas(absolutePath)
+    #     for node in result:
+    #         with open("location_emitChangeParameter_Gas.txt","a") as file:
+    #             file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
+
+if __name__ == '__main__':
+    operator_1()
+    # operator_2()
 
 
 

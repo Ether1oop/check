@@ -71,6 +71,8 @@ def getEmitStatementFromFunctionDefinition(function_node):
         if item['type'] == 'EmitStatement':
             emit_statements.append(item)
         elif item['type'] == 'IfStatement':
+            if item['TrueBody'] == ";" or item['FalseBody'] == ";":
+                continue
             if item['TrueBody'] is not None and item['TrueBody']['type'] == 'Block':
                 nodes.extend(item['TrueBody']['statements'])
             elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
@@ -109,6 +111,8 @@ def getVariableDeclarationStatementFromFunctionDefinition(function_node):
         if item['type'] == 'VariableDeclarationStatement':
             variable_statements.append(item)
         elif item['type'] == 'IfStatement':
+            if item['TrueBody'] == ";" or item['FalseBody'] == ";":
+                continue
             if item['TrueBody'] is not None and item['TrueBody']['type'] == 'Block':
                 nodes.extend(item['TrueBody']['statements'])
             elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':

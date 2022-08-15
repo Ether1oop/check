@@ -123,6 +123,8 @@ def getVariableFromEventDefinition(event_node):
     name = event_node['name']
     parameter = []
     for item in event_node['parameters']['parameters']:
+        if item['name'] == None:
+            continue
         parameter.append(item['name'])
     return [name, parameter]
 
