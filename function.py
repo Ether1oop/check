@@ -27,7 +27,7 @@ def getRepositoriesNameList():
     file_list = os.listdir(repositories_path)
     file_list.sort(key=lambda x:int(x[:-4]))
 
-    for i in range(0,50):
+    for i in range(50,100):
         file_node = file_list[i]
         with open(repositories_path + "/" + file_node,"r") as file:
             jsonStr = json.loads(file.read())
@@ -264,12 +264,12 @@ def operator_1():
                 print(str(i) + "\t" + str(j) + "\t" + absolute_path_node)
                 result = test_emitSwapOrder(absolute_path_node)
                 if result > 0:
-                    with open("result_emitSwapOrder.txt","a") as file:
+                    with open("__result_emitSwapOrder.txt","a") as file:
                         file.write(repository_name + "," + absolute_path_node + "\n")
-                # result = test_emitChangeParameter_Gas(absolute_path_node)
-                # if result > 0:
-                #     with open("result_emitChangeParameter_Gas.txt","a") as file:
-                #         file.write(repository_name + "," + absolute_path_node + "\n")
+                result = test_emitChangeParameter_Gas(absolute_path_node)
+                if result > 0:
+                    with open("__result_emitChangeParameter_Gas.txt","a") as file:
+                        file.write(repository_name + "," + absolute_path_node + "\n")
 
 
 def dealwithAbsolutePath(repoName , absolutePath):
@@ -282,9 +282,9 @@ def dealwithAbsolutePath(repoName , absolutePath):
 def operator_2():
     emitSwapOrder_list = []
     emitChangeParameter_Gas = []
-    with open("result_emitSwapOrder.txt","r") as file:
-        emitSwapOrder_list = file.read().split("\n")[:-1]
-    with open("result_emitChangeParameter_Gas.txt","r") as file:
+    # with open("result_emitSwapOrder.txt","r") as file:
+    #     emitSwapOrder_list = file.read().split("\n")[:-1]
+    with open("__result_emitChangeParameter_Gas.txt","r") as file:
         emitChangeParameter_Gas = file.read().split("\n")[:-1]
 
     for item in emitSwapOrder_list:
@@ -294,16 +294,16 @@ def operator_2():
             with open("location_emitSwapOrder.txt","a") as file:
                 file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
 
-    # for item in emitChangeParameter_Gas:
-    #     absolutePath = item.split(",")[1]
-    #     result = _test_emitChangeParameter_Gas(absolutePath)
-    #     for node in result:
-    #         with open("location_emitChangeParameter_Gas.txt","a") as file:
-    #             file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
+    for item in emitChangeParameter_Gas:
+        absolutePath = item.split(",")[1]
+        result = _test_emitChangeParameter_Gas(absolutePath)
+        for node in result:
+            with open("__location_emitChangeParameter_Gas.txt","a") as file:
+                file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
 
 if __name__ == '__main__':
-    operator_1()
-    # operator_2()
+    # operator_1()
+    operator_2()
 
 
 
