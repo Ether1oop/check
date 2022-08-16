@@ -176,17 +176,18 @@ def _test_emitSwapOrder(absolute_path_node):
     return list(result)
 
 
-def checkVariable(binary_operation_list,variable,temp_typename_list):
+def checkVariable(binary_operation_list,variable,temp_typename_list,emit_variable_list):
     flag = False
     for item in binary_operation_list:
         if item[0] == variable:
-            if item[1] in temp_typename_list:
+            if item[1] in temp_typename_list and item[1] not in emit_variable_list:
                 flag = True
                 break
         elif item[1] == variable:
-            if item[0] in temp_typename_list:
+            if item[0] in temp_typename_list and item[0] not in emit_variable_list:
                 flag = True
                 break
+
     return flag
 
 def test_emitChangeParameter_Gas(repo_name, absolute_path_node):
@@ -231,8 +232,7 @@ def test_emitChangeParameter_Gas(repo_name, absolute_path_node):
     return num
 
 
-def _test_emitChangeParameter_Gas(absolute_path_node):
-    result = set()
+def _test_emitChangeParameter_Gas(repo_name, absolute_path_node):
     source_unit = SolidityUnit.solidity_parse(absolute_path_node)
 
     if source_unit is None:
@@ -249,21 +249,29 @@ def _test_emitChangeParameter_Gas(absolute_path_node):
         state_typeName_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(state_variable_list)
         function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
         for function_node in function_list:
-            emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
-            if len(emit_statement_list) == 0:
+            if len(function_node['body']) == 0:
                 continue
             function_name = function_node['name']
             # Get all temp variable
             temp_variable_list = FunctionDefinition.getVariableDeclarationStatementFromFunctionDefinition(function_node)
             temp_typename_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(temp_variable_list)
             temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
-            # Get all variable in emit
-            emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
-            for emit_node in emit_variableName_list:
-                for variable in emit_node:
-                    if variable not in temp_typename_list and variable in state_typeName_list:
-                        result.add(function_name)
-    return list(result)
+            binary_operation_list = []
+
+            for statement_node in function_node['body']['statements']:
+                if statement_node == ";" or statement_node is None:
+                    continue
+                if statement_node['type'] != 'EmitStatement':
+                    binary_operation_list.extend(FunctionDefinition.getBinaryOperationFromStatements(statement_node))
+                else:
+                    emit_variable_list = FunctionDefinition.getVariablesFromEmitStatement(statement_node)
+                    for variable in emit_variable_list:
+                        if variable not in temp_typename_list and variable in state_typeName_list:
+                            if checkVariable(binary_operation_list, variable, temp_typename_list, emit_variable_list):
+                                with open("result_emitChangeParameter_Gas.txt", "a") as file:
+                                    file.write(dealwithAbsolutePath(repo_name,absolute_path_node) + "," + function_name + "," + variable + "\n")
+
+
 
 
 def operator_1():
@@ -283,7 +291,7 @@ def operator_1():
                 if result > 0:
                     with open("__result_emitSwapOrder.txt","a") as file:
                         file.write(repository_name + "," + absolute_path_node + "\n")
-                test_emitChangeParameter_Gas(repository_name,absolute_path_node)
+                _test_emitChangeParameter_Gas(repository_name,absolute_path_node)
                 # if result > 0:
                 #     with open("__result_emitChangeParameter_Gas.txt","a") as file:
                 #         file.write(repository_name + "," + absolute_path_node + "\n")
@@ -320,7 +328,7 @@ def operator_2():
 
 if __name__ == '__main__':
     # test_emitChangeParameter_Gas("/home/yantong/Code/check/test/EmitChangeParameter/gas_1.sol")
-    # test_emitChangeParameter_Gas("/home/yantong/Code/CodeLine/repos/ethereum EIPs/assets/eip-4675/contracts/MFNFT.sol")
+    # _test_emitChangeParameter_Gas("yam-finance yam-protocol", "/home/yantong/Code/CodeLine/repos/yam-finance yam-protocol/contracts/reserves/YAMReserves.sol")
     operator_1()
     # operator_2()
 

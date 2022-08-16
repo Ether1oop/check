@@ -79,6 +79,9 @@ def getEmitStatementFromFunctionDefinition(function_node):
                 nodes.extend(item['FalseBody']['statements'])
         elif item['type'] == 'ForStatement' and item['body']['type'] == 'Block':
             nodes.extend(item['body']['statements'])
+        elif item['type'] == 'UncheckedStatement':
+            if len(item['body'])!=0 and item['body']['type'] == 'Block':
+                nodes.extend(item['body']['statements'])
     return emit_statements
 
 
@@ -121,6 +124,9 @@ def getVariableDeclarationStatementFromFunctionDefinition(function_node):
                 nodes.extend(item['FalseBody']['statements'])
         elif item['type'] == 'ForStatement' and item['body']['type'] == 'Block':
             nodes.extend(item['body']['statements'])
+        elif item['type'] == 'UncheckedStatement':
+            if len(item['body'])!=0 and item['body']['type'] == 'Block':
+                nodes.extend(item['body']['statements'])
     return variable_statements
 
 
@@ -131,6 +137,69 @@ def getParameterVariableFromFunctionDefinition(function_node):
         if item['type'] == 'Parameter':
             result.append(item['name'])
     return result
+
+
+def getBinaryOperationFromStatements(statement_node):
+    nodes = []
+    nodes.append(statement_node)
+
+    binary_operation_list = []
+    binary_variable_list = []
+
+    for item in nodes:
+
+        if item is None:
+            continue
+        if 'type' not in item:
+            continue
+
+        if item['type'] == 'ExpressionStatement':
+            if item['expression']['type'] == 'BinaryOperation':
+                binary_operation_list.append(item['expression'])
+        elif item['type'] == 'IfStatement':
+            if item['TrueBody'] == ";" or item['FalseBody'] == ";":
+                continue
+            if item['TrueBody'] is not None and item['TrueBody']['type'] == 'Block':
+                nodes.extend(item['TrueBody']['statements'])
+            elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
+                nodes.extend(item['FalseBody']['statements'])
+        elif item['type'] == 'ForStatement' and item['body']['type'] == 'Block':
+            nodes.extend(item['body']['statements'])
+        elif item['type'] == 'VariableDeclarationStatement':
+            if item['initialValue'] is not None:
+                if item['initialValue']['type'] == 'Identifier':
+                    binary_variable_list.append([item['variables'][0]['name'], item['initialValue']['name']])
+        elif item['type'] == 'UncheckedStatement':
+            if len(item['body'])!=0 and item['body']['type'] == 'Block':
+                nodes.extend(item['body']['statements'])
+
+    for item in binary_operation_list:
+        if item['left']['type'] == 'IndexAccess':
+            node = item['left']['base']
+            while node['type'] == 'IndexAccess':
+                node = node['base']
+            if node['type'] != 'Identifier':
+                continue
+            left_variable = node['name']
+        elif item['left']['type'] == 'Identifier':
+            left_variable = item['left']['name']
+        else:
+            continue
+
+        if item['right']['type'] == 'IndexAccess':
+            node = item['right']['base']
+            while node['type'] == 'IndexAccess':
+                node = node['base']
+            if node['type'] != 'Identifier':
+                continue
+            right_variable = node['name']
+        elif item['right']['type'] == 'Identifier':
+            right_variable = item['right']['name']
+        else:
+            continue
+        binary_variable_list.append([left_variable, right_variable])
+
+    return binary_variable_list
 
 
 def getBinaryOperationFromFunctionDefinition(function_node):
@@ -161,6 +230,9 @@ def getBinaryOperationFromFunctionDefinition(function_node):
             if item['initialValue'] is not None:
                 if item['initialValue']['type'] == 'Identifier':
                     binary_variable_list.append([item['variables'][0]['name'],item['initialValue']['name']])
+        elif item['type'] == 'UncheckedStatement':
+            if len(item['body'])!=0 and item['body']['type'] == 'Block':
+                nodes.extend(item['body']['statements'])
 
     for item in binary_operation_list:
         if item['left']['type'] == 'IndexAccess':
