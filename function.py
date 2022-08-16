@@ -27,7 +27,7 @@ def getRepositoriesNameList():
     file_list = os.listdir(repositories_path)
     file_list.sort(key=lambda x:int(x[:-4]))
 
-    for i in range(50,100):
+    for i in range(0,100):
         file_node = file_list[i]
         with open(repositories_path + "/" + file_node,"r") as file:
             jsonStr = json.loads(file.read())
@@ -176,7 +176,20 @@ def _test_emitSwapOrder(absolute_path_node):
     return list(result)
 
 
-def test_emitChangeParameter_Gas(absolute_path_node):
+def checkVariable(binary_operation_list,variable,temp_typename_list):
+    flag = False
+    for item in binary_operation_list:
+        if item[0] == variable:
+            if item[1] in temp_typename_list:
+                flag = True
+                break
+        elif item[1] == variable:
+            if item[0] in temp_typename_list:
+                flag = True
+                break
+    return flag
+
+def test_emitChangeParameter_Gas(repo_name, absolute_path_node):
     num = 0
     source_unit = SolidityUnit.solidity_parse(absolute_path_node)
 
@@ -194,7 +207,10 @@ def test_emitChangeParameter_Gas(absolute_path_node):
         state_typeName_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(state_variable_list)
         function_list = SolidityUnit.getFunctionDefinitionFromContractDefinition(contract_node)
         for function_node in function_list:
+            if len(function_node['body']) == 0:
+                continue
             emit_statement_list = FunctionDefinition.getEmitStatementFromFunctionDefinition(function_node)
+            binary_operation_list = FunctionDefinition.getBinaryOperationFromFunctionDefinition(function_node)
             if len(emit_statement_list) == 0:
                 continue
             function_name = function_node['name']
@@ -204,13 +220,14 @@ def test_emitChangeParameter_Gas(absolute_path_node):
             temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
             # Get all variable in emit
             emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
+
             for emit_node in emit_variableName_list:
                 for variable in emit_node:
                     if variable not in temp_typename_list and variable in state_typeName_list:
-                        # print(
-                        #     "Advice: you can use temporary variables instead of global variables to reduce about 800 gas when emit something")
-                        # print("\tLocation:  function " + function_name)\
-                        num += 1
+                        if checkVariable(binary_operation_list, variable, temp_typename_list):
+                            with open("result_emitChangeParameter_Gas.txt", "a") as file:
+                                file.write(function_name + "," + variable + "," + dealwithAbsolutePath(repo_name,absolute_path_node) + "\n")
+                            num += 1
     return num
 
 
@@ -266,10 +283,10 @@ def operator_1():
                 if result > 0:
                     with open("__result_emitSwapOrder.txt","a") as file:
                         file.write(repository_name + "," + absolute_path_node + "\n")
-                result = test_emitChangeParameter_Gas(absolute_path_node)
-                if result > 0:
-                    with open("__result_emitChangeParameter_Gas.txt","a") as file:
-                        file.write(repository_name + "," + absolute_path_node + "\n")
+                test_emitChangeParameter_Gas(repository_name,absolute_path_node)
+                # if result > 0:
+                #     with open("__result_emitChangeParameter_Gas.txt","a") as file:
+                #         file.write(repository_name + "," + absolute_path_node + "\n")
 
 
 def dealwithAbsolutePath(repoName , absolutePath):
@@ -284,7 +301,7 @@ def operator_2():
     emitChangeParameter_Gas = []
     # with open("result_emitSwapOrder.txt","r") as file:
     #     emitSwapOrder_list = file.read().split("\n")[:-1]
-    with open("__result_emitChangeParameter_Gas.txt","r") as file:
+    with open("result_emitChangeParameter_Gas.txt","r") as file:
         emitChangeParameter_Gas = file.read().split("\n")[:-1]
 
     for item in emitSwapOrder_list:
@@ -302,8 +319,10 @@ def operator_2():
                 file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
 
 if __name__ == '__main__':
-    # operator_1()
-    operator_2()
+    # test_emitChangeParameter_Gas("/home/yantong/Code/check/test/EmitChangeParameter/gas_1.sol")
+    # test_emitChangeParameter_Gas("/home/yantong/Code/CodeLine/repos/ethereum EIPs/assets/eip-4675/contracts/MFNFT.sol")
+    operator_1()
+    # operator_2()
 
 
 

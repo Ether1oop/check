@@ -88,6 +88,8 @@ def getVariablesFromEmitStatement(emit_statement):
     for item in variable_list:
         if item['type'] == 'Identifier':
             result.append(item['name'])
+        elif item['type'] == 'IndexAccess':
+            variable_list.append(item['base'])
         # elif item['type'] == 'FunctionCall':
 
     return result
@@ -130,3 +132,60 @@ def getParameterVariableFromFunctionDefinition(function_node):
             result.append(item['name'])
     return result
 
+
+def getBinaryOperationFromFunctionDefinition(function_node):
+    nodes = function_node['body']['statements']
+    binary_operation_list = []
+    binary_variable_list = []
+
+    for item in nodes:
+
+        if item is None:
+            continue
+        if 'type' not in item:
+            continue
+
+        if item['type'] == 'ExpressionStatement':
+            if item['expression']['type'] == 'BinaryOperation':
+                binary_operation_list.append(item['expression'])
+        elif item['type'] == 'IfStatement':
+            if item['TrueBody'] == ";" or item['FalseBody'] == ";":
+                continue
+            if item['TrueBody'] is not None and item['TrueBody']['type'] == 'Block':
+                nodes.extend(item['TrueBody']['statements'])
+            elif item['FalseBody'] is not None and item['FalseBody']['type'] == 'Block':
+                nodes.extend(item['FalseBody']['statements'])
+        elif item['type'] == 'ForStatement' and item['body']['type'] == 'Block':
+            nodes.extend(item['body']['statements'])
+        elif item['type'] == 'VariableDeclarationStatement':
+            if item['initialValue'] is not None:
+                if item['initialValue']['type'] == 'Identifier':
+                    binary_variable_list.append([item['variables'][0]['name'],item['initialValue']['name']])
+
+    for item in binary_operation_list:
+        if item['left']['type'] == 'IndexAccess':
+            node = item['left']['base']
+            while node['type'] == 'IndexAccess':
+                node = node['base']
+            if node['type'] != 'Identifier':
+                continue
+            left_variable = node['name']
+        elif item['left']['type'] == 'Identifier':
+            left_variable = item['left']['name']
+        else:
+            continue
+
+        if item['right']['type'] == 'IndexAccess':
+            node = item['right']['base']
+            while node['type'] == 'IndexAccess':
+                node = node['base']
+            if node['type'] != 'Identifier':
+                continue
+            right_variable = node['name']
+        elif item['right']['type'] == 'Identifier':
+            right_variable = item['right']['name']
+        else:
+            continue
+        binary_variable_list.append([left_variable,right_variable])
+
+    return binary_variable_list
