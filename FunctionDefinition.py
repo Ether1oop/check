@@ -44,17 +44,23 @@ def getAllStateVariableDeclarationFromContractDefinition(contract_list):
 
 
 def getNameTypeFromStateVariableDeclaration(state_node):
+    name = []
     if state_node['variables'] is not None:
-        name = state_node['variables'][0]['name']
-    # typeName = state_node['variables'][0]['typeName']['name']
-    # return [name,typeName]
-        return name
+        for item in state_node['variables']:
+            if 'storageLocation' in item:
+                if item['storageLocation'] != 'storage':
+                    name.append(item['name'])
+            else:
+                name.append(item['name'])
+    return name
 
 
 def getAllNameTypeFromStateVariableDeclaration(state_list):
     nameType = []
     for item in state_list:
-        nameType.append(getNameTypeFromStateVariableDeclaration(item))
+        temp = getNameTypeFromStateVariableDeclaration(item)
+        if temp is not None:
+            nameType.extend(temp)
     return nameType
 
 
@@ -91,8 +97,8 @@ def getVariablesFromEmitStatement(emit_statement):
     for item in variable_list:
         if item['type'] == 'Identifier':
             result.append(item['name'])
-        elif item['type'] == 'IndexAccess':
-            variable_list.append(item['base'])
+        # elif item['type'] == 'IndexAccess':
+        #     variable_list.append(item['base'])
         # elif item['type'] == 'FunctionCall':
 
     return result
@@ -134,7 +140,7 @@ def getParameterVariableFromFunctionDefinition(function_node):
     parameters_list = function_node['parameters']['parameters']
     result = []
     for item in parameters_list:
-        if item['type'] == 'Parameter':
+        if item['type'] == 'Parameter' and item['typeName']['type'] != 'ArrayTypeName' and item['storageLocation'] != 'storage':
             result.append(item['name'])
     return result
 

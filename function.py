@@ -327,8 +327,8 @@ def operator_2():
                 file.write(dealwithAbsolutePath(item.split(",")[0],absolutePath) + "," + node + "\n")
 
 if __name__ == '__main__':
-    # test_emitChangeParameter_Gas("/home/yantong/Code/check/test/EmitChangeParameter/gas_1.sol")
-    # _test_emitChangeParameter_Gas("yam-finance yam-protocol", "/home/yantong/Code/CodeLine/repos/yam-finance yam-protocol/contracts/reserves/YAMReserves.sol")
+    # _test_emitChangeParameter_Gas("sad","/home/yantong/Code/check/test/EmitChangeParameter/gas_1.sol")
+    # _test_emitChangeParameter_Gas("Dapp-Learning-DAO Dapp-Learning", "/home/yantong/Code/CodeLine/repos/Dapp-Learning-DAO Dapp-Learning/basic/14-chainlink-price-feed/contracts/RandomNumberConsumer.sol")
     operator_1()
     # operator_2()
 
