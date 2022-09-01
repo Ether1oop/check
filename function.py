@@ -27,7 +27,7 @@ def getRepositoriesNameList():
     file_list = os.listdir(repositories_path)
     file_list.sort(key=lambda x:int(x[:-4]))
 
-    for i in range(0,100):
+    for i in range(100,200):
         file_node = file_list[i]
         with open(repositories_path + "/" + file_node,"r") as file:
             jsonStr = json.loads(file.read())
@@ -268,7 +268,7 @@ def _test_emitChangeParameter_Gas(repo_name, absolute_path_node):
                     for variable in emit_variable_list:
                         if variable not in temp_typename_list and variable in state_typeName_list:
                             if checkVariable(binary_operation_list, variable, temp_typename_list, emit_variable_list):
-                                with open("result_emitChangeParameter_Gas.txt", "a") as file:
+                                with open("100-200_result_emitChangeParameter_Gas.txt", "a") as file:
                                     file.write(dealwithAbsolutePath(repo_name,absolute_path_node) + "," + function_name + "," + variable + "\n")
 
 
@@ -289,7 +289,7 @@ def operator_1():
                 print(str(i) + "\t" + str(j) + "\t" + absolute_path_node)
                 result = test_emitSwapOrder(absolute_path_node)
                 if result > 0:
-                    with open("__result_emitSwapOrder.txt","a") as file:
+                    with open("100-200_result_emitSwapOrder.txt","a") as file:
                         file.write(repository_name + "," + absolute_path_node + "\n")
                 _test_emitChangeParameter_Gas(repository_name,absolute_path_node)
                 # if result > 0:
@@ -328,9 +328,9 @@ def operator_2():
 
 if __name__ == '__main__':
     # _test_emitChangeParameter_Gas("sad","/home/yantong/Code/check/test/EmitChangeParameter/gas_1.sol")
-    # _test_emitChangeParameter_Gas("Dapp-Learning-DAO Dapp-Learning", "/home/yantong/Code/CodeLine/repos/Dapp-Learning-DAO Dapp-Learning/basic/14-chainlink-price-feed/contracts/RandomNumberConsumer.sol")
+    # _test_emitChangeParameter_Gas("unlock-protocol unlock", "/home/yantong/Code/CodeLine/repos/unlock-protocol unlock/packages/contracts/src/contracts/PublicLock/PublicLockV7.sol")
     operator_1()
     # operator_2()
-
+# 全局变量还需要到父合约中寻找
 
 

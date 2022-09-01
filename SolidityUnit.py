@@ -25,6 +25,8 @@ def getPragmaDirective(source_unit):
 def getImportDirective(source_unit):
     import_list = []
     for child in source_unit['children']:
+        if child is None:
+            continue
         if child['type'] == 'ImportDirective':
             import_list.append(child)
     return import_list
@@ -33,6 +35,8 @@ def getImportDirective(source_unit):
 def getContractDefinition(source_unit):
     contract_list = []
     for child in source_unit['children']:
+        if child is None:
+            continue
         if child['type'] == 'ContractDefinition':
             if child['kind'] == 'contract':
                 contract_list.append(child)
