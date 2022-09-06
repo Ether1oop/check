@@ -6,10 +6,12 @@ import queue
 
 def solidity_parse(path):
     try:
+        # print("\t\t compiling " + path)
         source_unit = solidity_parser.parse_file(path)
-        return source_unit
     except:
-        print("parse error!\t" + path)
+        source_unit = None
+        # print("parse error!\t" + path)
+    return source_unit
 
 
 def getPragmaDirective(source_unit):
@@ -23,6 +25,8 @@ def getPragmaDirective(source_unit):
 def getImportDirective(source_unit):
     import_list = []
     for child in source_unit['children']:
+        if child is None:
+            continue
         if child['type'] == 'ImportDirective':
             import_list.append(child)
     return import_list
@@ -31,6 +35,8 @@ def getImportDirective(source_unit):
 def getContractDefinition(source_unit):
     contract_list = []
     for child in source_unit['children']:
+        if child is None:
+            continue
         if child['type'] == 'ContractDefinition':
             if child['kind'] == 'contract':
                 contract_list.append(child)
@@ -51,6 +57,13 @@ def getStateVariableDeclarationFromContractDefinition(contract_node):
         if item['type'] == 'StateVariableDeclaration':
             state_list.append(item)
     return state_list
+
+
+def getBaseContractsFromContractDefinition(contract_node):
+    result = []
+    for base_item in contract_node['baseContracts']:
+        result.append(base_item['baseName']['namePath'])
+    return result
 
 
 def repairNewPath(absolute_path, path):
@@ -114,6 +127,8 @@ def getVariableFromEventDefinition(event_node):
     name = event_node['name']
     parameter = []
     for item in event_node['parameters']['parameters']:
+        if item['name'] == None:
+            continue
         parameter.append(item['name'])
     return [name, parameter]
 
@@ -132,6 +147,8 @@ def getEventDefinitionFromList(event_name, event_list):
 
 
 def calculateSimilarity(src_list, target_list):
+    if len(src_list) != len(target_list):
+        return False
     result = []
     for src_node in src_list:
         similarity = 0
@@ -166,7 +183,6 @@ def IsOrderError(src_list, target_list):
             return True
 
     return False
-
 
 
 

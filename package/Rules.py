@@ -27,7 +27,7 @@ def emitAdd_AfterConstruct(contract_node):
             print("\tLocation: function " + function_node['name'])
 
 
-def emitChangeParameter_Gas(contract_node):
+def emitChangeParameter_Gas(absolute_path, contract_node):
     # Get all global variables
     state_variable_list = SolidityUnit.getStateVariableDeclarationFromContractDefinition(contract_node)
     state_typeName_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(state_variable_list)
@@ -43,13 +43,20 @@ def emitChangeParameter_Gas(contract_node):
         temp_typename_list = FunctionDefinition.getAllNameTypeFromStateVariableDeclaration(temp_variable_list)
         temp_typename_list.extend(FunctionDefinition.getParameterVariableFromFunctionDefinition(function_node))
         # Get all variable in emit
-        emit_variableName_list = FunctionDefinition.getAllVariableFromEmitStatementList(emit_statement_list)
-        # ����ÿһ����emit�еı����������������ʱ�����У�������ȫ�ֱ����У��ͱ�ʾ��Ҫ�����޸�
-        for emit_node in emit_variableName_list:
-            for variable in emit_node:
-                if variable not in temp_typename_list and variable in state_typeName_list:
-                    print("Advice: you can use temporary variables instead of global variables to reduce about 800 gas when emit something")
-                    print("\tLocation:  function " + function_name)
+        binary_operation_list = []
+
+        for statement_node in function_node['body']['statements']:
+            if statement_node == ";" or statement_node is None:
+                continue
+            if statement_node['type'] != 'EmitStatement':
+                binary_operation_list.extend(FunctionDefinition.getBinaryOperationFromStatements(statement_node))
+            else:
+                emit_variable_list = FunctionDefinition.getVariablesFromEmitStatement(statement_node)
+                for variable in emit_variable_list:
+                    if variable not in temp_typename_list and variable in state_typeName_list:
+                        if FunctionDefinition.checkVariable(binary_operation_list, variable, temp_typename_list, emit_variable_list):
+                            print("Advice: Use Memory Type Variable Instead of Storage Type Variable in Event to Save Gas")
+                            print("Location:\n\t filename: " + absolute_path + "\n\t function name: " + function_node['name'] + "\n\t event name: " + statement_node['eventCall']['expression']['name'] + "\n\t variable name: " + variable + "\n")
 
 
 def emitChangeParameter_MetaTransaction(absolute_path, source_unit):
