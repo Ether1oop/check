@@ -11,27 +11,27 @@ Download the package from `/dist`.
 
 ##### whl
 ```
-#> pip install EventUseAnalysisTool-0.0.1-py3-none-any.whl
+#> pip install gas_reducer-0.0.1-py3-none-any.whl
 ```
 or
 ```
-#> pip3 install EventUseAnalysisTool-0.0.1-py3-none-any.whl
+#> pip3 install gas_reducer-0.0.1-py3-none-any.whl
 ```
 
 ##### tar.gz
 ```
-#> tar -xzvf EventUseAnalysisTool-0.0.1.tar.gz
-#> cd EventUseAnalysisTool-0.0.1
+#> tar -xzvf gas_reducer-0.0.1.tar.gz
+#> cd gas_reducer-0.0.1
 #> python3 setup.py install
 ```
 
 ## How To
 ```
-#> python3 -m sol_tool <path_to_contract.sol>
+#> python3 -m gas_reducer <path_to_contract.sol>
 ```
 or
 ```
-#> python3 -m sol_tool <path_to_your_project>
+#> python3 -m gas_reducer <path_to_your_project>
 ```
 the output will be:
 ```
