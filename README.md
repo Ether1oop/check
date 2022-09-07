@@ -1,3 +1,3 @@
-# Solidity Event Use Analysis Tool
+# Problematic Event Logging Parameter Checker for Gas Saving
 
 ## install
