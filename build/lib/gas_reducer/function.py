@@ -1,5 +1,5 @@
-from sol_tool import Rules
-from sol_tool import SolidityUnit
+from gas_reducer import Rules
+from gas_reducer import SolidityUnit
 
 def scan(absolute_path):
     source_unit = SolidityUnit.solidity_parse(absolute_path)

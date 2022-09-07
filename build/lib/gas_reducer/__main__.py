@@ -1,6 +1,6 @@
 import os.path
 import sys
-from sol_tool import function
+from gas_reducer import function
 
 if __name__ == "__main__":
     if not len(sys.argv) > 1:

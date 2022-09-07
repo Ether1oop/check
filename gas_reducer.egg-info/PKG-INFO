@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: EventUseAnalysisTool
+Name: gas-reducer
 Version: 0.0.1
 Summary: A tool for analyzing solidity events
 Home-page: https://github.com/SolEventStudy/Solidity-Event-Study

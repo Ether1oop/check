@@ -4,7 +4,7 @@ with open("README.md", "r") as file:
     long_description = file.read()
 
 setuptools.setup(
-    name="EventUseAnalysisTool",
+    name="gas_reducer",
     version="0.0.1",
     author="solEventStudy",
     author_email="lJSBDFLJWEBHdljkB@outlook.com",

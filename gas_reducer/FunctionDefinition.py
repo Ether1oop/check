@@ -1,4 +1,4 @@
-from sol_tool import SolidityUnit
+from gas_reducer import SolidityUnit
 
 
 def retrieveTransferFromContract(contract_node):

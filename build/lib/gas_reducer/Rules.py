@@ -1,5 +1,5 @@
-from sol_tool import FunctionDefinition
-from sol_tool import SolidityUnit
+from gas_reducer import FunctionDefinition
+from gas_reducer import SolidityUnit
 import dictdiffer
 
 
