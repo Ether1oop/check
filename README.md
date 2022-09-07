@@ -43,5 +43,16 @@ Location:
 	 variable name: [the name of problematic event logging parameter]
 ...
 ```
-
-
+# Reponse
+```
+https://github.com/smartcontractkit/chainlink-mix/issues/46
+https://github.com/smartbugs/smartbugs/issues/129
+https://github.com/VenusProtocol/venus-protocol/pull/147
+https://github.com/OokiTrade/contractsV2/pull/282
+https://github.com/argentlabs/argent-contracts/pull/306
+https://github.com/smartcontractkit/foundry-starter-kit/issues/11
+https://github.com/unlock-protocol/unlock/pull/9522
+https://github.com/Dapp-Learning-DAO/Dapp-Learning/pull/825
+https://github.com/smartcontractkit/foundry-starter-kit/pull/12
+https://github.com/DeFiOptions/DeFiOptions-core/issues/22
+```
