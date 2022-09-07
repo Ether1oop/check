@@ -1,6 +1,5 @@
 from gas_reducer import FunctionDefinition
 from gas_reducer import SolidityUnit
-import dictdiffer
 
 
 def emitAdd_AfterTransfer(contract_node):

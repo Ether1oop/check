@@ -1,5 +1,5 @@
 import os
-import difflib
+# import difflib
 import solidity_parser
 import queue
 
